@@ -3,7 +3,7 @@ import 'package:flutter_application_1/screens/course/add_place.dart';
 import 'package:flutter_application_1/screens/course/modal.dart';
 
 class MadeCosPage extends StatelessWidget {
-  const MadeCosPage({super.key});
+  const MadeCosPage({super.key, required String title});
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +113,7 @@ class MadeCosPage extends StatelessWidget {
     return Stack(
       children: [
         Image.asset(
-          'assets/cos_block.png',
+          'assets/made_cos.png',
           width: double.infinity,
           fit: BoxFit.cover,
         ),

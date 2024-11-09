@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/course/make_cos.dart';
+import 'package:flutter_application_1/screens/course/new.dart';
 import 'package:flutter_application_1/screens/detail/Myreview.dart';
 import 'package:flutter_application_1/screens/detail/favoriate.dart';
 import 'package:flutter_application_1/screens/home/profile.dart';
@@ -139,7 +139,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                         onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const MakeCosPage(),
+                            builder: (context) => const Cos(),
                           ),
                         ),
                         icon: const Icon(Icons.work_outline),

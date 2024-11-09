@@ -3,7 +3,14 @@ import 'package:flutter_application_1/screens/course/add_place.dart';
 import 'package:flutter_application_1/screens/course/modal.dart';
 
 class MakeCosPage extends StatelessWidget {
-  const MakeCosPage({super.key});
+  final String title;
+  final String subtitle;
+
+  const MakeCosPage({
+    super.key,
+    required this.title,
+    required this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -72,14 +79,14 @@ class MakeCosPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8.0),
                 Padding(
-                  padding: const EdgeInsets.only(right: 80.0),
+                  padding: const EdgeInsets.only(right: 60.0),
                   child: Image.asset(
                     'assets/make_cos.png',
                     width: double.infinity,
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: 38.0, right: 4, top: 10),
+                  padding: const EdgeInsets.only(left: 38.0, right: 4),
                   child: SizedBox(
                     width: double.infinity,
                     height: 25,

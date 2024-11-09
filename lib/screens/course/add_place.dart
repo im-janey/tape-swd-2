@@ -204,7 +204,7 @@ class _AddPlacePageState extends State<AddPlacePage> {
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const MadeCosPage(),
+                    builder: (context) => const MadeCosPage(title: '',),
                   ),
                 ),
                 style: ElevatedButton.styleFrom(

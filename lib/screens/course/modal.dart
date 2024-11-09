@@ -20,13 +20,17 @@ class _ModalState extends State<Modal> {
       if (cosName.isNotEmpty) {
         try {
           await FirebaseFirestore.instance
-              .collection('users')
+              .collection('my cos')
               .doc(user.uid)
-              .update({'cosname': cosName});
+              .set({'cosname': cosName}, SetOptions(merge: true));
+
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => MakeCosPage(),
+              builder: (context) => MakeCosPage(
+                title: '',
+                subtitle: '',
+              ),
             ),
           );
         } catch (e) {
@@ -53,6 +57,7 @@ class _ModalState extends State<Modal> {
         ],
       ),
       content: TextField(
+        controller: _cosNameController, // 추가된 부분
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
@@ -90,7 +95,7 @@ class _ModalState extends State<Modal> {
         ),
         ElevatedButton(
           onPressed: () {
-            _saveCosName;
+            _saveCosName();
           },
           child: Text(
             '설정',

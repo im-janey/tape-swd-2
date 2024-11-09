@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'made_cos.dart';
 import 'modal.dart';
 
 class Cos extends StatefulWidget {
@@ -147,8 +148,13 @@ class _CosState extends State<Cos> with SingleTickerProviderStateMixin {
           const SizedBox(height: 20),
           Expanded(
             child: ListView(
-              children: [
-                // Add CustomListTiles or other widgets here
+              children: const [
+                CustomListTile(
+                  imageUrl: 'https://example.com/image.jpg',
+                  title: '성수동데이트',
+                  subtitle: '2024.8.29',
+                ),
+                // Add more CustomListTiles here
               ],
             ),
           ),
@@ -193,6 +199,14 @@ class CustomListTile extends StatelessWidget {
           // 클릭 시 실행될 동작
         },
       ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MadeCosPage(title: title),
+          ),
+        );
+      },
     );
   }
 }
