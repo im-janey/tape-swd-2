@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class menubar extends StatelessWidget {
-  final String collectionName; // 컬렉션 이름
-  final String id; // 문서 ID
+  final String collectionName;
+  final String id;
 
   const menubar({super.key, required this.collectionName, required this.id});
 
@@ -12,8 +12,8 @@ class menubar extends StatelessWidget {
     return Scaffold(
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
-            .collection(collectionName) // 외부에서 받은 컬렉션 이름 사용
-            .doc(id) // 외부에서 받은 문서 ID 사용
+            .collection(collectionName)
+            .doc(id)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -30,7 +30,7 @@ class menubar extends StatelessWidget {
             stream: FirebaseFirestore.instance
                 .collection(collectionName)
                 .doc(id)
-                .collection('menufood') // 'menufood' 서브 컬렉션은 고정
+                .collection('menufood')
                 .snapshots(),
             builder: (context, menuSnapshot) {
               if (menuSnapshot.connectionState == ConnectionState.waiting) {
@@ -49,7 +49,6 @@ class menubar extends StatelessWidget {
                     (menuDoc) {
                       var data = menuDoc.data() as Map<String, dynamic>;
 
-                      // 데이터를 안전하게 변환합니다.
                       List<String> names =
                           List<String>.from(data['name'] ?? []);
                       List<String> prices =

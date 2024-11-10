@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/detail/menu.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -22,7 +21,6 @@ class _ProfileState extends State<Profile> {
     _loadUserData();
   }
 
-  // 사용자 데이터 로드
   Future<void> _loadUserData() async {
     User? user = _auth.currentUser;
     if (user != null) {
@@ -36,7 +34,6 @@ class _ProfileState extends State<Profile> {
     }
   }
 
-  // gs:// URL을 HTTPS URL로 변환
   String _convertGsUrlToHttps(String gsUrl) {
     if (!gsUrl.startsWith('gs://')) return gsUrl;
 
@@ -59,31 +56,7 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('프로필 편집'),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              await _updateUserData();
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Menu()),
-              );
-            },
-            child: Padding(
-              padding: EdgeInsets.only(top: 5, right: 20),
-              child: Text(
-                '완료',
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.all(25.0),
         child: Column(

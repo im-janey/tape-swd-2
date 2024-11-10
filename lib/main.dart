@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/detail/menu.dart';
 import 'package:flutter_application_1/screens/home/home.dart';
 import 'package:flutter_application_1/screens/intro/splash1.dart';
 
@@ -32,7 +31,6 @@ class Homepage extends StatelessWidget {
       home: Splash1(),
       routes: {
         '/home': (context) => Home(),
-        '/menu': (context) => Menu(),
       },
     );
   }

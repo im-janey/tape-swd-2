@@ -39,7 +39,6 @@ class _RatingState extends State<Rating> {
     widget.ratingFields.forEach((key, _) => _ratings[key] = 0);
   }
 
-  // gs:// URL을 HTTPS URL로 변환
   String _convertGsUrlToHttps(String gsUrl) {
     if (!gsUrl.startsWith('gs://')) return gsUrl;
 
@@ -195,7 +194,7 @@ class _RatingState extends State<Rating> {
                           index < _ratings[entry.key]!
                               ? Icons.star
                               : Icons.star_border,
-                          color: Color(0xff4863E0),
+                          color: Theme.of(context).primaryColor,
                         ),
                         iconSize: 28,
                         onPressed: () =>
@@ -225,13 +224,14 @@ class _RatingState extends State<Rating> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(color: Color(0xff4863E0), width: 1.5),
+              borderSide:
+                  BorderSide(color: Theme.of(context).primaryColor, width: 1.5),
             ),
             labelStyle: TextStyle(color: Colors.grey),
           ),
           maxLines: null,
           minLines: 5,
-          cursorColor: Color(0xff4863E0),
+          cursorColor: Theme.of(context).primaryColor,
         ),
         SizedBox(height: 40),
       ],

@@ -196,14 +196,16 @@ class _DetailPageState extends State<DetailPage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.favorite,
-                      color: _isFavorited ? Color(0xff4863E0) : Colors.black12,
+                      color: _isFavorited
+                          ? Theme.of(context).primaryColor
+                          : Colors.black12,
                       size: 26),
                   SizedBox(height: 4.0),
                   Text('찜하기',
                       style: TextStyle(
                           fontSize: 12,
                           color: _isFavorited
-                              ? Color(0xff4863E0)
+                              ? Theme.of(context).primaryColor
                               : Colors.black26)),
                 ],
               ),
@@ -247,8 +249,8 @@ class _DetailPageState extends State<DetailPage>
             SizedBox(height: 8.0),
             TabBar(
               controller: _tabController,
-              indicatorColor: Color(0xff4863E0),
-              labelColor: Color(0xff4863E0),
+              indicatorColor: Theme.of(context).primaryColor,
+              labelColor: Theme.of(context).primaryColor,
               tabs: const [
                 Tab(child: Text('리뷰', style: TextStyle(fontSize: 16))),
                 Tab(child: Text('정보', style: TextStyle(fontSize: 16))),
