@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -36,27 +37,37 @@ class _MadeCosPageState extends State<MadeCosPage> {
     _fetchPlaceDetails();
   }
 
-  void _updateCameraBounds() {
-    if (_markers.isEmpty) return;
+  Future<void> _saveSelectedPlaces() async {
+    final docRef =
+        FirebaseFirestore.instance.collection('my cos').doc(widget.id);
 
-    LatLngBounds bounds;
-    final latitudes =
-        _markers.map((marker) => marker.position.latitude).toList();
-    final longitudes =
-        _markers.map((marker) => marker.position.longitude).toList();
+    try {
+      final randomDoc = await FirebaseFirestore.instance
+          .collection('cos')
+          .doc(widget.id)
+          .get();
 
-    final southwest = LatLng(
-      latitudes.reduce((a, b) => a < b ? a : b),
-      longitudes.reduce((a, b) => a < b ? a : b),
-    );
-    final northeast = LatLng(
-      latitudes.reduce((a, b) => a > b ? a : b),
-      longitudes.reduce((a, b) => a > b ? a : b),
-    );
+      List<dynamic> randomImages = randomDoc.data()?['random'] ?? [];
 
-    bounds = LatLngBounds(southwest: southwest, northeast: northeast);
+      await docRef.update({
+        'selectedplace': widget.selectedplace,
+        'randomImages': randomImages,
+      });
 
-    _controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
+      print('Firestore에 선택된 장소와 랜덤 이미지가 업데이트되었습니다.');
+
+      Navigator.popUntil(
+        context,
+        (route) => route.settings.name == 'Cos',
+      );
+    } catch (e) {
+      print('Error updating selected places: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('선택한 장소 저장에 실패했습니다.')),
+        );
+      }
+    }
   }
 
   void _onMapCreated(GoogleMapController controller) {
@@ -92,21 +103,6 @@ class _MadeCosPageState extends State<MadeCosPage> {
               });
               _addMarker(contentId, title, lat, lng);
             }
-          } else if (item is List && item.isNotEmpty) {
-            var firstItem = item[0];
-            double? lat = double.tryParse(firstItem['mapy'] ?? '');
-            double? lng = double.tryParse(firstItem['mapx'] ?? '');
-            String title = firstItem['title'] ?? '제목 없음';
-
-            if (lat != null && lng != null) {
-              fetchedDetails.add({
-                'contentid': contentId,
-                'title': title,
-                'lat': lat,
-                'lng': lng,
-              });
-              _addMarker(contentId, title, lat, lng);
-            }
           }
         }
       } catch (e) {
@@ -132,156 +128,60 @@ class _MadeCosPageState extends State<MadeCosPage> {
     });
   }
 
+  void _updateCameraBounds() {
+    if (_markers.isEmpty) return;
+
+    final latitudes =
+        _markers.map((marker) => marker.position.latitude).toList();
+    final longitudes =
+        _markers.map((marker) => marker.position.longitude).toList();
+
+    final southwest = LatLng(
+      latitudes.reduce((a, b) => a < b ? a : b),
+      longitudes.reduce((a, b) => a < b ? a : b),
+    );
+    final northeast = LatLng(
+      latitudes.reduce((a, b) => a > b ? a : b),
+      longitudes.reduce((a, b) => a > b ? a : b),
+    );
+
+    final bounds = LatLngBounds(southwest: southwest, northeast: northeast);
+    _controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(''),
+        title: Text('${widget.cosName}'),
         actions: [
           ElevatedButton(
-            onPressed: () {
-              Navigator.popUntil(
-                context,
-                (route) => route.settings.name == 'Cos',
-              );
-            },
-            child: Text('저장'),
+            onPressed: _saveSelectedPlaces,
+            child: const Text('저장'),
           ),
         ],
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.only(left: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      '${widget.cosName}',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8.0),
-                Text(
-                  '${widget.timestamp.toLocal().year}-${widget.timestamp.toLocal().month}-${widget.timestamp.toLocal().day}',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16.0),
           Container(
             height: 200.0,
             child: GoogleMap(
               initialCameraPosition: _initialPosition,
               onMapCreated: _onMapCreated,
               markers: _markers,
-              zoomControlsEnabled: true,
             ),
           ),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: placeDetails.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                      itemCount: placeDetails.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: buildListTile(
-                            index: index + 1,
-                            text1: placeDetails[index]['title'] ?? '제목 없음',
-                            text2: '',
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 34.0, right: 34, top: 10),
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  side: const BorderSide(color: Colors.black, width: 0.3),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
+            child: placeDetails.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    itemCount: placeDetails.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(placeDetails[index]['title'] ?? '제목 없음'),
+                      );
+                    },
                   ),
-                ),
-                child: const Text(
-                  '장소추가하기',
-                  style: TextStyle(fontSize: 14),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 50,
-          )
-        ],
-      ),
-    );
-  }
-
-  Widget buildListTile({
-    required int index,
-    required String text1,
-    required String text2,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 4,
-            offset: Offset(2, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '$index',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            text1,
-            style: const TextStyle(
-                fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            text2,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.black45,
-            ),
           ),
         ],
       ),

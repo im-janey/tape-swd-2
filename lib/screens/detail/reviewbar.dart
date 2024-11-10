@@ -23,11 +23,18 @@ class ReviewPage extends StatefulWidget {
 
 class _ReviewPageState extends State<ReviewPage> {
   String _profileImageUrl = '';
+  bool _isDisposed = false; // dispose 여부 체크
 
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true; // dispose 상태로 설정
+    super.dispose();
   }
 
   Future<String> _getDownloadUrl(String imageUrl) async {
@@ -55,7 +62,10 @@ class _ReviewPageState extends State<ReviewPage> {
       String imageUrl = userData['image'] ?? '';
       imageUrl = await _getDownloadUrl(imageUrl);
 
-      setState(() => _profileImageUrl = imageUrl);
+      // mounted 또는 _isDisposed로 체크
+      if (mounted && !_isDisposed) {
+        setState(() => _profileImageUrl = imageUrl);
+      }
     }
   }
 
@@ -96,7 +106,6 @@ class _ReviewPageState extends State<ReviewPage> {
         SizedBox(height: 10),
         Expanded(
           child: ReviewList(
-            //작성화면
             collectionName: widget.collectionName,
             id: widget.id,
           ),

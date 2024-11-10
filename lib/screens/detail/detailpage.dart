@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/detail/infobar.dart';
 import 'package:flutter_application_1/screens/detail/menubar.dart';
 import 'package:http/http.dart' as http;
-
 import 'reviewbar.dart';
 
 class DetailPage extends StatefulWidget {
@@ -44,7 +43,6 @@ class _DetailPageState extends State<DetailPage>
   @override
   void initState() {
     super.initState();
-
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
       userId = currentUser.uid;
@@ -67,7 +65,6 @@ class _DetailPageState extends State<DetailPage>
       setState(() {
         _hasError = true;
       });
-      print('Error initializing data: $e');
     }
   }
 
@@ -89,7 +86,6 @@ class _DetailPageState extends State<DetailPage>
         await _favoriteService.removeFavorite(userId, widget.id);
       }
     } catch (e) {
-      print('Error toggling favorite: $e');
       setState(() {
         _isFavorited = !_isFavorited;
       });
@@ -103,21 +99,14 @@ class _DetailPageState extends State<DetailPage>
         'http://apis.data.go.kr/B551011/KorWithService1/searchKeyword1?serviceKey=$apiKey&MobileOS=ETC&MobileApp=AppTest&keyword=${widget.name}&numOfRows=10&pageNo=1&_type=json';
 
     try {
-      final response = await http.get(
-        Uri.parse(apiUrl),
-        headers: {
-          'Accept': 'application/json',
-        },
-      );
+      final response = await http
+          .get(Uri.parse(apiUrl), headers: {'Accept': 'application/json'});
 
       if (response.statusCode == 200) {
         final decodedData = json.decode(utf8.decode(response.bodyBytes));
-        print('Response Body: ${utf8.decode(response.bodyBytes)}');
-
         var items = decodedData['response']?['body']?['items']?['item'];
 
         if (items == null || items.isEmpty) {
-          print('No items found');
           setState(() {
             _contentId = null;
             _contentTypeId = null;
@@ -142,27 +131,17 @@ class _DetailPageState extends State<DetailPage>
               if (item['firstimage'] != null) item['firstimage'].toString()
             ];
           });
-        } else {
-          print('Unexpected data format');
         }
-      } else {
-        print('Failed to load data. Status code: ${response.statusCode}');
       }
-    } catch (e) {
-      print('Error fetching content details: $e');
-    }
+    } catch (e) {}
   }
 
   @override
   Widget build(BuildContext context) {
     if (_hasError) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text('상세 정보'),
-        ),
-        body: Center(
-          child: Text('데이터를 불러오는 중 문제가 발생했습니다.'),
-        ),
+        appBar: AppBar(title: Text('상세 정보')),
+        body: Center(child: Text('데이터를 불러오는 중 문제가 발생했습니다.')),
       );
     }
 
@@ -254,7 +233,7 @@ class _DetailPageState extends State<DetailPage>
               tabs: const [
                 Tab(child: Text('리뷰', style: TextStyle(fontSize: 16))),
                 Tab(child: Text('정보', style: TextStyle(fontSize: 16))),
-                Tab(child: Text('메뉴', style: TextStyle(fontSize: 16))),
+                Tab(child: Text('기타', style: TextStyle(fontSize: 16))),
               ],
             ),
             Expanded(
@@ -273,13 +252,11 @@ class _DetailPageState extends State<DetailPage>
                           }),
                         ),
                         InfoPage(
-                          contentId: _contentId!,
-                          contentTypeId: _contentTypeId!,
-                        ),
+                            contentId: _contentId!,
+                            contentTypeId: _contentTypeId!),
                         menubar(
-                          collectionName: widget.collectionName,
-                          id: widget.id,
-                        ),
+                            collectionName: widget.collectionName,
+                            id: widget.id),
                       ],
                     )
                   : Center(child: CircularProgressIndicator()),

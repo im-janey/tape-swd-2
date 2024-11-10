@@ -233,36 +233,20 @@ class _FavoritePageState extends State<AddPlacePage> {
     });
   }
 
-  void _onCompleteSelection() async {
+  void _onCompleteSelection() {
     List<String> selectedContentIds =
         selectedPlaces.map((place) => place['contentid'] as String).toList();
 
-    final docRef =
-        FirebaseFirestore.instance.collection('my cos').doc(widget.id);
-
-    try {
-      await docRef.update({
-        'selectedplace': selectedContentIds,
-      });
-
-      print('Firestore에 선택된 장소가 업데이트되었습니다.');
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MadeCosPage(
-            id: widget.id,
-            cosName: widget.cosName,
-            timestamp: widget.timestamp,
-            selectedplace: selectedContentIds,
-          ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MadeCosPage(
+          id: widget.id,
+          cosName: widget.cosName,
+          timestamp: widget.timestamp,
+          selectedplace: selectedContentIds,
         ),
-      );
-    } catch (e) {
-      print('Error updating selected places: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('선택한 장소 저장에 실패했습니다.')),
-      );
-    }
+      ),
+    );
   }
 }

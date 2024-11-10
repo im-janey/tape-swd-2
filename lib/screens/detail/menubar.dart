@@ -30,7 +30,7 @@ class menubar extends StatelessWidget {
             stream: FirebaseFirestore.instance
                 .collection(collectionName)
                 .doc(id)
-                .collection('menufood')
+                .collection('menu')
                 .snapshots(),
             builder: (context, menuSnapshot) {
               if (menuSnapshot.connectionState == ConnectionState.waiting) {
@@ -54,7 +54,7 @@ class menubar extends StatelessWidget {
                       List<String> prices =
                           List<String>.from(data['price'] ?? []);
                       List<String> images =
-                          List<String>.from(data['images'] ?? []);
+                          List<String>.from(data['image'] ?? []);
 
                       return Column(
                         children: [

@@ -1,7 +1,7 @@
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/course/others.dart';
 import 'package:flutter_application_1/screens/course/showcos.dart';
 import 'modal.dart';
 
@@ -17,14 +17,12 @@ class _CosState extends State<Cos> with SingleTickerProviderStateMixin {
   final TextEditingController _textController = TextEditingController();
   final String userId = FirebaseAuth.instance.currentUser!.uid;
   List<Map<String, dynamic>> myCourses = [];
-  List<String> image = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _fetchMyCourses();
-    _fetchImageUrls();
   }
 
   @override
@@ -32,28 +30,6 @@ class _CosState extends State<Cos> with SingleTickerProviderStateMixin {
     _tabController.dispose();
     _textController.dispose();
     super.dispose();
-  }
-
-  Future<void> _fetchImageUrls() async {
-    try {
-      final docSnapshot = await FirebaseFirestore.instance
-          .collection('cos')
-          .doc('nkyzZSsn3eM9in57kiXr')
-          .get();
-
-      image = List<String>.from(docSnapshot.data()?['image'] ?? []);
-      print('Fetched image URLs: $image');
-    } catch (e) {
-      print('Error fetching image URLs: $e');
-    }
-  }
-
-  String _getRandomImageUrl() {
-    if (image.isNotEmpty) {
-      final randomIndex = Random().nextInt(image.length);
-      return image[randomIndex];
-    }
-    return 'https://example.com/default-image.jpg';
   }
 
   Future<void> _fetchMyCourses() async {
@@ -75,20 +51,38 @@ class _CosState extends State<Cos> with SingleTickerProviderStateMixin {
       setState(() {
         myCourses = courses;
       });
-    } catch (e) {}
+    } catch (e) {
+      print('Error fetching courses: $e');
+    }
   }
 
   Future<void> _deleteCourse(String docId) async {
     try {
-      await FirebaseFirestore.instance.collection('my cos').doc(docId).delete();
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('my cos')
+          .doc(docId)
+          .get();
 
-      setState(() {
-        myCourses.removeWhere((course) => course['id'] == docId);
-      });
+      final String courseUid = docSnapshot.data()?['uid'] ?? '';
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('코스가 삭제되었습니다.')),
-      );
+      if (courseUid == userId) {
+        await FirebaseFirestore.instance
+            .collection('my cos')
+            .doc(docId)
+            .delete();
+
+        setState(() {
+          myCourses.removeWhere((course) => course['id'] == docId);
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('코스가 삭제되었습니다.')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('삭제 권한이 없습니다.')),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('코스 삭제에 실패했습니다.')),
@@ -190,7 +184,7 @@ class _CosState extends State<Cos> with SingleTickerProviderStateMixin {
         else
           ...myCourses.map((course) {
             return CustomListTile(
-              imageUrl: _getRandomImageUrl(),
+              imageUrl: 'https://via.placeholder.com/150.png', // 기본 이미지로 설정
               title: course['cosname'],
               subtitle:
                   '${course['timestamp'].year}.${course['timestamp'].month}.${course['timestamp'].day}',
@@ -203,20 +197,7 @@ class _CosState extends State<Cos> with SingleTickerProviderStateMixin {
   }
 
   Widget _buildOtherCoursesTab() {
-    return Padding(
-      padding: const EdgeInsets.only(right: 20, left: 20, top: 40),
-      child: Column(
-        children: [
-          TextField(
-            controller: _textController,
-            decoration: InputDecoration(
-              labelText: '원하는 장소를 검색해보세요',
-              suffixIcon: const Icon(Icons.search),
-            ),
-          ),
-        ],
-      ),
-    );
+    return const OtherCos();
   }
 }
 
@@ -224,7 +205,7 @@ class CustomListTile extends StatelessWidget {
   final String imageUrl;
   final String title;
   final String subtitle;
-  final String id; // 코스의 id 필드 추가
+  final String id;
   final VoidCallback onDelete;
 
   const CustomListTile({
