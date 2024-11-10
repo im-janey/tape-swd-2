@@ -73,9 +73,8 @@ class FavoritePage extends StatelessWidget {
     const apiKey =
         'K%2Bwrqt0w3kcqkpq5TzBHI8P37Kfk50Rlz1dYzc62tM2ltmIBDY3VG4eiblr%2FQbjw1JSXZYsFQBw4IieHP9cP9g%3D%3D';
 
-    // 각 콘텐츠 ID에 대해 API 요청을 보내서 가게 정보를 가져옵니다.
     for (var contentId in contentIds) {
-      print('Fetching data for contentId: $contentId'); // contentId 로그 출력
+      print('Fetching data for contentId: $contentId');
 
       final apiUrl =
           'https://apis.data.go.kr/B551011/KorWithService1/detailCommon1?MobileOS=ios&MobileApp=sad&contentId=$contentId&defaultYN=Y&firstImageYN=Y&areacodeYN=Y&_type=json&serviceKey=$apiKey';
@@ -84,12 +83,12 @@ class FavoritePage extends StatelessWidget {
 
         if (response.statusCode == 200) {
           final decodedData = json.decode(utf8.decode(response.bodyBytes));
-          print('Decoded Data: $decodedData'); // 디버깅을 위한 응답 전체 출력
+          print('Decoded Data: $decodedData');
           var item = decodedData['response']?['body']?['items']?['item'];
 
           if (item is Map<String, dynamic>) {
             print(
-                'Item found for contentId: $contentId, title: ${item['title']}'); // 디버깅용 로그
+                'Item found for contentId: $contentId, title: ${item['title']}');
 
             result.add({
               'contentid': contentId,

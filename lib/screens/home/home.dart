@@ -48,7 +48,7 @@ class _HomeState extends State<Home> {
         context,
         MaterialPageRoute(builder: (context) => Frame(product: product)),
       ),
-      child: Image.asset(asset, height: 55, width: 50),
+      child: Image.asset(asset, height: 43),
     );
   }
 
@@ -61,7 +61,7 @@ class _HomeState extends State<Home> {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          toolbarHeight: 110,
+          toolbarHeight: 100,
           title: Image.asset('assets/logo.png', width: 140),
           actions: [
             Stack(
@@ -92,84 +92,97 @@ class _HomeState extends State<Home> {
         endDrawer: CustomDrawer(),
         body: Column(
           children: [
-            SizedBox(height: 15),
+            SizedBox(height: 20),
             Banner1(),
-            SizedBox(height: 40),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 50),
-              child: TextField(
-                controller: _searchController,
-                focusNode: _searchFocusNode,
-                cursorColor: Theme.of(context).primaryColor,
-                onSubmitted: (value) {
-                  if (value.isNotEmpty) {
-                    _navigateToSearch(value);
-                  }
-                },
-                decoration: InputDecoration(
-                  hintText: '어디로 갈까요?',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).primaryColor,
-                      width: _isSearchFocused ? 2.0 : 2.0,
+            SizedBox(height: 38),
+            SizedBox(
+              width: 308,
+              child: Card(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25), // 원하는 둥글기 값으로 설정
+                ),
+                elevation: 5.0,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(
+                          top: 25, left: 25, right: 25, bottom: 20),
+                      child: TextField(
+                        controller: _searchController,
+                        focusNode: _searchFocusNode,
+                        cursorColor: Theme.of(context).primaryColor,
+                        onSubmitted: (value) {
+                          if (value.isNotEmpty) {
+                            _navigateToSearch(value);
+                          }
+                        },
+                        decoration: InputDecoration(
+                          hintText: '어느 장소를 찾아볼까요?',
+                          hintStyle: TextStyle(
+                            fontSize: 13, // 원하는 크기로 설정
+                            fontWeight: FontWeight.bold, // 두껍게 설정
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(10), // 원하는 둥글기 값으로 설정
+                            borderSide: BorderSide.none, // 테두리 없애기
+                          ),
+                          filled: true,
+                          fillColor: _isSearchFocused
+                              ? Theme.of(context).primaryColor.withOpacity(0.1)
+                              : Colors.grey[100],
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.search),
+                            onPressed: () {
+                              if (_searchController.text.isNotEmpty) {
+                                _navigateToSearch(_searchController.text);
+                              } else {
+                                _navigateToSearch();
+                              }
+                            },
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 16), // 세로 길이 조절
+                        ),
+                      ),
                     ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).primaryColor,
-                      width: 1.0,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          children: [
+                            _buildIconButton(
+                                'assets/bob.png', restaurantProduct),
+                            SizedBox(height: 10),
+                            _buildIconButton(
+                                'assets/display.png', displayProduct),
+                          ],
+                        ),
+                        SizedBox(width: 35),
+                        Column(
+                          children: [
+                            _buildIconButton('assets/cafe.png', cafeProduct),
+                            SizedBox(height: 10),
+                            _buildIconButton('assets/play.png', playProduct),
+                          ],
+                        ),
+                        SizedBox(width: 35),
+                        Column(
+                          children: [
+                            _buildIconButton('assets/park.png', parkProduct),
+                            SizedBox(height: 10),
+                            _buildIconButton(
+                                'assets/mall.png', shoppingProduct),
+                          ],
+                        ),
+                      ],
                     ),
-                  ),
-                  filled: true,
-                  fillColor: _isSearchFocused
-                      ? Theme.of(context).primaryColor.withOpacity(0.1)
-                      : Colors.grey[100],
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.search),
-                    onPressed: () {
-                      if (_searchController.text.isNotEmpty) {
-                        _navigateToSearch(_searchController.text);
-                      } else {
-                        _navigateToSearch();
-                      }
-                    },
-                  ),
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+                    SizedBox(height: 20),
+                  ],
                 ),
               ),
             ),
-            SizedBox(height: 35),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  children: [
-                    _buildIconButton('assets/bob.png', restaurantProduct),
-                    SizedBox(height: 20),
-                    _buildIconButton('assets/display.png', displayProduct),
-                  ],
-                ),
-                SizedBox(width: 30),
-                Column(
-                  children: [
-                    _buildIconButton('assets/cafe.png', cafeProduct),
-                    SizedBox(height: 20),
-                    _buildIconButton('assets/play.png', playProduct),
-                  ],
-                ),
-                SizedBox(width: 30),
-                Column(
-                  children: [
-                    _buildIconButton('assets/park.png', parkProduct),
-                    SizedBox(height: 20),
-                    _buildIconButton('assets/mall.png', shoppingProduct),
-                  ],
-                ),
-              ],
-            )
           ],
         ),
       ),

@@ -1,6 +1,8 @@
+import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-import 'made_cos.dart';
+import 'package:flutter_application_1/screens/course/showcos.dart';
 import 'modal.dart';
 
 class Cos extends StatefulWidget {
@@ -13,11 +15,16 @@ class Cos extends StatefulWidget {
 class _CosState extends State<Cos> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _textController = TextEditingController();
+  final String userId = FirebaseAuth.instance.currentUser!.uid;
+  List<Map<String, dynamic>> myCourses = [];
+  List<String> image = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _fetchMyCourses();
+    _fetchImageUrls();
   }
 
   @override
@@ -25,6 +32,68 @@ class _CosState extends State<Cos> with SingleTickerProviderStateMixin {
     _tabController.dispose();
     _textController.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchImageUrls() async {
+    try {
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('cos')
+          .doc('nkyzZSsn3eM9in57kiXr')
+          .get();
+
+      image = List<String>.from(docSnapshot.data()?['image'] ?? []);
+      print('Fetched image URLs: $image');
+    } catch (e) {
+      print('Error fetching image URLs: $e');
+    }
+  }
+
+  String _getRandomImageUrl() {
+    if (image.isNotEmpty) {
+      final randomIndex = Random().nextInt(image.length);
+      return image[randomIndex];
+    }
+    return 'https://example.com/default-image.jpg';
+  }
+
+  Future<void> _fetchMyCourses() async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('my cos')
+          .where('uid', isEqualTo: userId)
+          .get();
+
+      final courses = querySnapshot.docs.map((doc) {
+        return {
+          'id': doc.id,
+          'cosname': doc.data()['cosname'] ?? '제목 없음',
+          'timestamp': doc.data()['timestamp']?.toDate() ?? DateTime.now(),
+          'selectedplace': doc.data()['selectedplace'] ?? [],
+        };
+      }).toList();
+
+      setState(() {
+        myCourses = courses;
+      });
+    } catch (e) {}
+  }
+
+  Future<void> _deleteCourse(String docId) async {
+    try {
+      await FirebaseFirestore.instance.collection('my cos').doc(docId).delete();
+
+      setState(() {
+        myCourses.removeWhere((course) => course['id'] == docId);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('코스가 삭제되었습니다.')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('코스 삭제에 실패했습니다.')),
+      );
+    }
   }
 
   @override
@@ -85,7 +154,10 @@ class _CosState extends State<Cos> with SingleTickerProviderStateMixin {
                   padding: const EdgeInsets.all(7),
                 ),
                 onPressed: () {
-                  _showCourseCreationModal(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Modal()),
+                  );
                 },
                 child: const Icon(Icons.add, size: 30),
               ),
@@ -113,12 +185,19 @@ class _CosState extends State<Cos> with SingleTickerProviderStateMixin {
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
         ),
         const SizedBox(height: 10),
-        CustomListTile(
-          imageUrl: 'https://example.com/image.jpg',
-          title: '성수동데이트',
-          subtitle: '2024.8.29',
-        ),
-        // Add more CustomListTiles here
+        if (myCourses.isEmpty)
+          const Center(child: Text('저장된 코스가 없습니다.'))
+        else
+          ...myCourses.map((course) {
+            return CustomListTile(
+              imageUrl: _getRandomImageUrl(),
+              title: course['cosname'],
+              subtitle:
+                  '${course['timestamp'].year}.${course['timestamp'].month}.${course['timestamp'].day}',
+              onDelete: () => _deleteCourse(course['id']),
+              id: course['id'],
+            );
+          }).toList(),
       ],
     );
   }
@@ -132,43 +211,11 @@ class _CosState extends State<Cos> with SingleTickerProviderStateMixin {
             controller: _textController,
             decoration: InputDecoration(
               labelText: '원하는 장소를 검색해보세요',
-              labelStyle: TextStyle(color: Colors.black),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.black),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.black),
-              ),
-              suffixIcon: Icon(Icons.search, color: Colors.black),
-              contentPadding:
-                  EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
-            ),
-            cursorColor: Theme.of(context).primaryColor,
-          ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: ListView(
-              children: const [
-                CustomListTile(
-                  imageUrl: 'https://example.com/image.jpg',
-                  title: '성수동데이트',
-                  subtitle: '2024.8.29',
-                ),
-                // Add more CustomListTiles here
-              ],
+              suffixIcon: const Icon(Icons.search),
             ),
           ),
         ],
       ),
-    );
-  }
-
-  void _showCourseCreationModal(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Modal();
-      },
     );
   }
 }
@@ -177,34 +224,36 @@ class CustomListTile extends StatelessWidget {
   final String imageUrl;
   final String title;
   final String subtitle;
+  final String id; // 코스의 id 필드 추가
+  final VoidCallback onDelete;
 
   const CustomListTile({
     super.key,
     required this.imageUrl,
     required this.title,
     required this.subtitle,
+    required this.id,
+    required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundImage: NetworkImage(imageUrl),
-      ),
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: IconButton(
-        icon: const Icon(Icons.delete_outline, size: 20),
-        onPressed: () {
-          // 클릭 시 실행될 동작
-        },
+    return InkWell(
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundImage: NetworkImage(imageUrl),
+        ),
+        title: Text(title),
+        subtitle: Text(subtitle),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete),
+          onPressed: onDelete,
+        ),
       ),
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => MadeCosPage(title: title),
-          ),
+          MaterialPageRoute(builder: (context) => Showcos(docId: id)),
         );
       },
     );

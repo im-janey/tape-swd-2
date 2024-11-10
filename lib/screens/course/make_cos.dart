@@ -1,22 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/course/add_place.dart';
-import 'package:flutter_application_1/screens/course/modal.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class MakeCosPage extends StatelessWidget {
-  final String title;
-  final String subtitle;
+class MakeCosPage extends StatefulWidget {
+  final String id;
+  final String cosName;
+  final DateTime timestamp;
 
   const MakeCosPage({
     super.key,
-    required this.title,
-    required this.subtitle,
+    required this.id,
+    required this.cosName,
+    required this.timestamp,
   });
+
+  @override
+  State<MakeCosPage> createState() => _MakeCosPageState();
+}
+
+class _MakeCosPageState extends State<MakeCosPage> {
+  static const CameraPosition _initialPosition = CameraPosition(
+    target: LatLng(37.5665, 126.9780),
+    zoom: 14,
+  );
+  late GoogleMapController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    _controller = controller;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(' '),
+        title: Text(''),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,34 +50,24 @@ class MakeCosPage extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Text(
-                      '코스 1',
-                      style: TextStyle(
+                    Text(
+                      '${widget.cosName}',
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Modal(),
-                        ),
-                      ),
-                      icon: const Icon(
-                        Icons.edit_location_alt_outlined,
-                        color: Colors.black54,
-                        size: 20,
+                        color: Colors.black,
                       ),
                     ),
                   ],
                 ),
-                const Text(
-                  '2024.10.3',
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54),
+                const SizedBox(height: 8.0),
+                Text(
+                  '${widget.timestamp.toLocal().year}-${widget.timestamp.toLocal().month}-${widget.timestamp.toLocal().day}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
               ],
             ),
@@ -64,8 +76,12 @@ class MakeCosPage extends StatelessWidget {
           Container(
             height: 200.0,
             color: Colors.grey[300],
-            child: const Center(
-              child: Text('지도'),
+            child: GoogleMap(
+              initialCameraPosition: _initialPosition,
+              onMapCreated: _onMapCreated,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: true,
             ),
           ),
           Padding(
@@ -79,14 +95,15 @@ class MakeCosPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8.0),
                 Padding(
-                  padding: const EdgeInsets.only(right: 60.0),
-                  child: Image.asset(
-                    'assets/make_cos.png',
-                    width: double.infinity,
+                  padding: const EdgeInsets.only(right: 80.0),
+                  child: SizedBox(
+                    width: 70,
+                    height: 30,
+                    child: Image.asset('assets/logo.png'),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: 38.0, right: 4),
+                  padding: const EdgeInsets.only(left: 38.0, right: 4, top: 10),
                   child: SizedBox(
                     width: double.infinity,
                     height: 25,
@@ -94,7 +111,11 @@ class MakeCosPage extends StatelessWidget {
                       onPressed: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const AddPlacePage(),
+                          builder: (context) => AddPlacePage(
+                            id: widget.id,
+                            cosName: widget.cosName,
+                            timestamp: widget.timestamp,
+                          ),
                         ),
                       ),
                       style: ElevatedButton.styleFrom(

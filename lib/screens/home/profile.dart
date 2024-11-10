@@ -36,6 +36,16 @@ class _ProfileState extends State<Profile> {
     }
   }
 
+  // gs:// URL을 HTTPS URL로 변환
+  String _convertGsUrlToHttps(String gsUrl) {
+    if (!gsUrl.startsWith('gs://')) return gsUrl;
+
+    final bucketName = gsUrl.split('/')[2];
+    final filePath = gsUrl.split('/').sublist(3).join('%2F');
+
+    return 'https://firebasestorage.googleapis.com/v0/b/$bucketName/o/$filePath?alt=media';
+  }
+
   Future<void> _updateUserData() async {
     User? user = _auth.currentUser;
     if (user != null) {
@@ -75,25 +85,12 @@ class _ProfileState extends State<Profile> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(5.0),
+        padding: const EdgeInsets.all(25.0),
         child: Column(
           children: [
             const SizedBox(height: 30),
             Center(
-              child: _profileImageUrl.isNotEmpty
-                  ? CircleAvatar(
-                      radius: 80,
-                      backgroundImage: NetworkImage(_profileImageUrl),
-                      onBackgroundImageError: (exception, stackTrace) {
-                        print('Error loading profile image: $exception');
-                      },
-                      child:
-                          _profileImageUrl.isEmpty ? Icon(Icons.person) : null,
-                    )
-                  : CircleAvatar(
-                      radius: 80,
-                      child: Icon(Icons.person),
-                    ),
+              child: _buildProfileImage(),
             ),
             const SizedBox(height: 30),
             _buildTextField('닉네임', _nicknameController),
@@ -112,6 +109,23 @@ class _ProfileState extends State<Profile> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildProfileImage() {
+    final imageUrl = _profileImageUrl.startsWith('gs://')
+        ? _convertGsUrlToHttps(_profileImageUrl)
+        : _profileImageUrl;
+
+    return CircleAvatar(
+      radius: 80,
+      backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+      child: imageUrl.isEmpty ? Icon(Icons.person) : null,
+      onBackgroundImageError: imageUrl.isNotEmpty
+          ? (exception, stackTrace) {
+              print('Error loading profile image: $exception');
+            }
+          : null,
     );
   }
 
@@ -160,7 +174,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     }
 
     try {
-      // Simulate a successful password change process
       await Future.delayed(const Duration(seconds: 2));
 
       ScaffoldMessenger.of(context).showSnackBar(

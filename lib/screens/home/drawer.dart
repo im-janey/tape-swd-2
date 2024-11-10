@@ -7,6 +7,7 @@ import 'package:flutter_application_1/screens/detail/Myreview.dart';
 import 'package:flutter_application_1/screens/detail/favoriate.dart';
 import 'package:flutter_application_1/screens/home/profile.dart';
 import 'package:flutter_application_1/screens/intro/login.dart';
+import 'package:flutter_application_1/screens/map/My_map.dart';
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({super.key});
@@ -18,7 +19,7 @@ class CustomDrawer extends StatefulWidget {
 class _CustomDrawerState extends State<CustomDrawer> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _profileImageUrl = '';
+  String _profileImageUrl = '';
   final TextEditingController _nicknameController = TextEditingController();
 
   @override
@@ -41,9 +42,19 @@ class _CustomDrawerState extends State<CustomDrawer> {
       }
 
       setState(() {
+        _profileImageUrl = imageUrl;
         _nicknameController.text = userData['nickname'] ?? '';
       });
     }
+  }
+
+  String _convertGsUrlToHttps(String gsUrl) {
+    if (!gsUrl.startsWith('gs://')) return gsUrl;
+
+    final bucketName = gsUrl.split('/')[2];
+    final filePath = gsUrl.split('/').sublist(3).join('%2F');
+
+    return 'https://firebasestorage.googleapis.com/v0/b/$bucketName/o/$filePath?alt=media';
   }
 
   @override
@@ -115,7 +126,12 @@ class _CustomDrawerState extends State<CustomDrawer> {
                             CircleAvatar(
                               radius: 30,
                               backgroundImage: _profileImageUrl.isNotEmpty
-                                  ? NetworkImage(_profileImageUrl)
+                                  ? NetworkImage(
+                                      _profileImageUrl.startsWith('gs://')
+                                          ? _convertGsUrlToHttps(
+                                              _profileImageUrl)
+                                          : _profileImageUrl,
+                                    )
                                   : AssetImage('assets/logo.png')
                                       as ImageProvider,
                             ),
@@ -140,6 +156,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => const Cos(),
+                            settings: RouteSettings(name: 'Cos'),
                           ),
                         ),
                         icon: const Icon(Icons.work_outline),
@@ -165,8 +182,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       IconButton(
                         onPressed: () => Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => FavoritePage()),
+                          MaterialPageRoute(builder: (context) => MyMap()),
                         ),
                         icon: const Icon(Icons.map_outlined),
                       ),

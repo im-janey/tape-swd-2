@@ -1,12 +1,14 @@
 import 'dart:collection';
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/detail/infobar.dart';
 import 'package:flutter_application_1/screens/detail/menubar.dart';
-import 'package:flutter_application_1/screens/detail/reviewbar.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import 'reviewbar.dart';
 
 class DetailPage extends StatefulWidget {
   final String name;

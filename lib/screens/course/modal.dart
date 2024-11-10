@@ -19,23 +19,31 @@ class _ModalState extends State<Modal> {
       final cosName = _cosNameController.text.trim();
       if (cosName.isNotEmpty) {
         try {
-          await FirebaseFirestore.instance
-              .collection('my cos')
-              .doc(user.uid)
-              .set({'cosname': cosName}, SetOptions(merge: true));
+          final docRef = FirebaseFirestore.instance.collection('my cos').doc();
+
+          await docRef.set({
+            'id': docRef.id,
+            'cosname': cosName,
+            'uid': user.uid,
+            'timestamp': FieldValue.serverTimestamp(),
+          });
+
+          final docSnapshot = await docRef.get();
+          final timestamp =
+              docSnapshot.data()?['timestamp']?.toDate() ?? DateTime.now();
 
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => MakeCosPage(
-                title: '',
-                subtitle: '',
+                id: docRef.id,
+                cosName: cosName,
+                timestamp: timestamp,
               ),
             ),
           );
         } catch (e) {
           print('Error saving cos name: $e');
-          // You might want to show an error message to the user here
         }
       }
     }
@@ -57,7 +65,7 @@ class _ModalState extends State<Modal> {
         ],
       ),
       content: TextField(
-        controller: _cosNameController, // 추가된 부분
+        controller: _cosNameController,
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,

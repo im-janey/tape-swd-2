@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/packages/product.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
@@ -32,12 +33,18 @@ class MyMap extends StatelessWidget {
   Future<List<dynamic>> fetchBySubCategories() async {
     const apiKey =
         'K%2Bwrqt0w3kcqkpq5TzBHI8P37Kfk50Rlz1dYzc62tM2ltmIBDY3VG4eiblr%2FQbjw1JSXZYsFQBw4IieHP9cP9g%3D%3D';
-    final List<String> subCategories = [
-      '식당',
-      '밥',
-      '음식',
-      '가게',
+
+    final List<Product> products = [
+      restaurantProduct,
+      cafeProduct,
+      parkProduct,
+      playProduct,
+      shoppingProduct,
+      displayProduct,
     ];
+
+    List<String> subCategories =
+        products.expand((product) => product.subCategories).toSet().toList();
 
     List<dynamic> allItems = [];
 
@@ -56,6 +63,7 @@ class MyMap extends StatelessWidget {
             final items =
                 decodedData['response']['body']['items']['item'] as List;
 
+            // 이미지가 있는 항목만 필터링
             allItems.addAll(items.where((item) =>
                 item['firstimage'] != null &&
                 item['firstimage'].toString().isNotEmpty));

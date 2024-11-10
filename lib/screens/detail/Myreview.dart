@@ -47,7 +47,6 @@ class _MyreviewState extends State<Myreview> {
           .get()
           .then((snapshot) => snapshot.docs)
           .catchError((error) {
-        // ignore: invalid_return_type_for_catch_error
         return [];
       });
     });
@@ -63,7 +62,7 @@ class _MyreviewState extends State<Myreview> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('리뷰 카테고리 선택')),
+      appBar: AppBar(title: const Text('')),
       body: Column(
         children: [
           const SizedBox(height: 20),
@@ -78,6 +77,11 @@ class _MyreviewState extends State<Myreview> {
                     _onChipSelected(index);
                   }
                 },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                selectedColor: Colors.teal[200],
+                backgroundColor: Colors.teal[200],
               );
             }),
           ),
@@ -100,7 +104,7 @@ class _MyreviewState extends State<Myreview> {
         return '';
       }
     }
-    return url; // 이미 HTTP(S) 형식이라면 그대로 반환
+    return url;
   }
 
   Widget _buildSelectedContent() {
